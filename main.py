@@ -3,14 +3,13 @@ from pydantic import BaseModel
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
-
+# Request modeli
 class Requests(BaseModel):
     message: str
-    chatId: str | None
+    chatId: str | None = None  # default None
 
-
-
-app = FastAPI(middleware=[
+# CORS middleware
+middleware = [
     Middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -18,7 +17,10 @@ app = FastAPI(middleware=[
         allow_methods=["*"],
         allow_headers=["*"],
     )
-])
+]
+
+# FastAPI instance
+app = FastAPI(middleware=middleware)
 
 @app.get("/")
 def read_root():
@@ -26,11 +28,11 @@ def read_root():
 
 @app.post("/chat")
 async def chatBot(request: Requests):
-    body = await request.json()
-    getMessage = body.get("message", "")
-    print(getMessage)
-    response = {
-        "message": "Bu bir yanıt mesajıdır: " + getMessage,
-    }
+    getMessage = request.message
+    chatId = request.chatId
+    print(f"Mesaj: {getMessage}, ChatID: {chatId}")
 
-    return response
+    return {
+        "message": f"Cevap: {getMessage}",
+        "chatId": chatId
+    }
