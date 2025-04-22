@@ -32,6 +32,7 @@ answers_data = []
 
 
 def get_together(question: str):
+    print(f"🔍 Soru: {question}")
     prompt = f"""
                ### 🚗 **Tuning & Modification AI Model**
                You are an expert in **automotive tuning, ECU remapping, and performance modifications.** Your task is to generate **3-5 structured and DRASTICALLY different answers** for the given question.
