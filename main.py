@@ -1,13 +1,24 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+
 
 class Requests(BaseModel):
     message: str
     chatId: str | None
 
-app = FastAPI()
 
 
+app = FastAPI(middleware=[
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+])
 
 @app.get("/")
 def read_root():
