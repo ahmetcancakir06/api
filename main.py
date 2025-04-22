@@ -14,4 +14,5 @@ async def chatBot(request: Requests):
     response = {
         "message": "Bu bir yanıt mesajıdır: " + getMessage,
     }
+
     return response
