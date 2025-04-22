@@ -121,9 +121,36 @@ def read_root():
 async def chatBot(request: Requests):
     getMessage = request.message
     chatId = request.chatId
+    if not getMessage:
+        return {"message": "Mesaj boş olamaz!"}
+    if not chatId:
+        chatId = str(int(time.time() * 1000))
+
+    getTogetherAnswer = get_together(getMessage)
+    if "answers" in getTogetherAnswer:
+        answers = getTogetherAnswer["answers"]
+        for answer in answers:
+            summary = answer.get("summary", "")
+            detailed_explanation = answer.get("detailed_explanation", "")
+            best_use_case = answer.get("best_use_case", "")
+            risk_factors = answer.get("risk_factors", "")
+
+            answers_data.append({
+                "summary": summary,
+                "detailed_explanation": detailed_explanation,
+                "best_use_case": best_use_case,
+                "risk_factors": risk_factors
+            })
+        print(f"Model cevabı: {answers_data}")
+    else:
+        answers_data.append({
+            "summary": "Model returned an invalid format.",
+            "detailed_explanation": "Parsing failed."
+        })
+
     print(f"Mesaj: {getMessage}, ChatID: {chatId}")
 
     return {
-        "message": f"Cevap: {getMessage}",
+        "message": answers_data,
         "chatId": chatId
     }
