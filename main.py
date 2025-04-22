@@ -69,6 +69,8 @@ def get_together(question: str):
                    }}
                  ]
                }}
+               5️⃣ The output **must be in the same language** as the question. For example, if the question is in Turkish, the entire JSON output (including all fields like summary, detailed_explanation, etc.) must be in Turkish as well. Do not translate or switch languages.
+
 
            """
     try:
