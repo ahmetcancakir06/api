@@ -41,8 +41,15 @@ def translate_to_english(text):
     return translation.text
 
 def translate_to_turkish(text):
-    translation = translator.translate(text, src='en', dest='tr')
-    return translation.text
+    try:
+        if not text or text.strip() == "":
+            return ""
+        translation = translator.translate(text, src='en', dest='tr')
+        return translation.text
+    except Exception as e:
+        print(f"Çeviri hatası: {e}")
+        return text  # Çeviremediyse orijinal texti döndür
+
 
 
 def get_together(question: str):
