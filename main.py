@@ -6,8 +6,10 @@ from together import Together
 import json
 import re
 import time
+from googletrans import Translator
 
 client = Together(api_key="32aa4adb290dc4d30203f9c36a10f72ea305846f214c06c0557b11199dc00ccf")
+translator = Translator()
 
 # Request modeli
 class Requests(BaseModel):
@@ -29,6 +31,18 @@ middleware = [
 app = FastAPI(middleware=middleware)
 
 answers_data = []
+
+def detect_language(text):
+    detection = translator.detect(text)
+    return detection.lang
+
+def translate_to_english(text):
+    translation = translator.translate(text, src='tr', dest='en')
+    return translation.text
+
+def translate_to_turkish(text):
+    translation = translator.translate(text, src='en', dest='tr')
+    return translation.text
 
 
 def get_together(question: str):
@@ -122,19 +136,31 @@ def read_root():
 async def chatBot(request: Requests):
     getMessage = request.message
     chatId = request.chatId
+    lang = detect_language(getMessage)
+    print(f"📚 Kullanıcının dili algılandı: {lang}")
     if not getMessage:
         return {"message": "Mesaj boş olamaz!"}
     if not chatId:
         chatId = str(int(time.time() * 1000))
 
+    if lang == "tr":
+        getMessage = translate_to_english(getMessage)
+        print(f"📚 Kullanıcı mesajı İngilizceye çevrildi: {getMessage}")
+
     getTogetherAnswer = get_together(getMessage)
     if "answers" in getTogetherAnswer:
         answers = getTogetherAnswer["answers"]
         for answer in answers:
-            summary = answer.get("summary", "")
-            detailed_explanation = answer.get("detailed_explanation", "")
-            best_use_case = answer.get("best_use_case", "")
-            risk_factors = answer.get("risk_factors", "")
+            if lang == "tr":
+                summary = translate_to_turkish(answer.get("summary", ""))
+                detailed_explanation = translate_to_turkish(answer.get("detailed_explanation", ""))
+                best_use_case = translate_to_turkish(answer.get("best_use_case", ""))
+                risk_factors = translate_to_turkish(answer.get("risk_factors", ""))
+            else:
+                summary = answer.get("summary", "")
+                detailed_explanation = answer.get("detailed_explanation", "")
+                best_use_case = answer.get("best_use_case", "")
+                risk_factors = answer.get("risk_factors", "")
 
             answers_data.append({
                 "summary": summary,
