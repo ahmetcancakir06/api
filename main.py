@@ -7,12 +7,41 @@ import json
 import re
 import time
 import os
+from sqlmodel import Field, Session, SQLModel, create_engine, select
+from dotenv import load_dotenv
+# Load environment variables from .env file
+load_dotenv()
+
 client = Together(api_key="32aa4adb290dc4d30203f9c36a10f72ea305846f214c06c0557b11199dc00ccf")
 
 # Request modeli
 class Requests(BaseModel):
     message: str
     chatId: str | None = None  # default None
+
+class postMail(BaseModel):
+    name_surname: str
+    email: str
+    subject: str
+    message: str
+
+# sql table for mail
+class Mail(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    name_surname: str = Field(index=True)
+    email: str = Field(index=True)
+    subject: str = Field(index=True)
+    message: str = Field(index=True)
+    created_at: str = Field(default_factory=time.time)
+
+print("🚀 FastAPI uygulaması başlatılıyor...")
+print(os.getenv("DATABASE_URL"))
+# Database connection
+#DATABASE_URL = os.getenv("DATABASE_URL", "DATABASE_URL")
+#engine = create_engine(DATABASE_URL, echo=True)
+# Create the database tables
+#SQLModel.metadata.create_all(engine)
+
 
 # CORS middleware
 middleware = [
@@ -117,6 +146,37 @@ def get_together(question: str):
 @app.get("/")
 def read_root():
     return {"message": "Ahmet'in API'si yayında!"}
+
+@app.post("/mail")
+async def sendMail(request: postMail):
+    getName = request.name_surname
+    getEmail = request.email
+    getSubject = request.subject
+    getMessage = request.message
+
+    if not getName or not getEmail or not getSubject or not getMessage:
+        return {"message": "Boş alan bırakmayın!"}
+    '''
+     Save to database
+    with Session(engine) as session:
+        mail = Mail(
+            name_surname=getName,
+            email=getEmail,
+            subject=getSubject,
+            message=getMessage,
+            created_at=time.time()
+        )
+        session.add(mail)
+        session.commit()
+    '''
+
+    return {
+        "message": "Mail başarıyla gönderildi!",
+        "name_surname": getName,
+        "email": getEmail,
+        "subject": getSubject,
+        "message": getMessage
+    }
 
 @app.post("/chat")
 async def chatBot(request: Requests):
